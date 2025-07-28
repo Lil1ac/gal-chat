@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: ai-agent
+  profiles:
+    active: local
+
+server:
+  port: 8081
+  servlet:
+    context-path: /api
+
+
+langchain4j:
+  community:
+    dashscope:
+      chat-model:
+        model-name: qwen-max-0403
+        api-key: ${aliQwen-api}
+      embedding-model:
+        model-name: text-embedding-v3
+        api-key: ${aliQwen-api}
+      streaming-chat-model:
+        model-name: qwen-max-0403
+        api-key: ${aliQwen-api}
+bigmodel:
+  api-key: ${zhipu-api}

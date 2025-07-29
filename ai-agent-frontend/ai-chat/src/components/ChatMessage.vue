@@ -11,11 +11,17 @@
           />
         </div>
       </div>
-      <div class="message-bubble">
+      <div class="message-bubble ai-bubble">
         <div class="message-header">
           <span class="character-name">本间心铃</span>
         </div>
-        <div class="message-text">{{ message }}<LoadingDots v-if="showLoading" /></div>
+        <div class="message-text">
+          <template v-for="(part, index) in parsedMessage" :key="index">
+            <span v-if="part.type === 'text'">{{ part.content }}</span>
+            <span v-else-if="part.type === 'thought'" class="thought-text">{{ part.content }}</span>
+          </template>
+          <LoadingDots v-if="showLoading" />
+        </div>
       </div>
     </div>
     
@@ -36,7 +42,7 @@
 <script setup>
 import { computed } from 'vue';
 import LoadingDots from './LoadingDots.vue';
-
+import textUtils from '../utils/text.js';
 const props = defineProps({
   message: {
     type: String,
@@ -57,6 +63,8 @@ const showLoading = computed(() => {
   // 只有AI消息且正在发送时才显示加载点
   return !props.isUser && props.isSending && props.message !== undefined;
 });
+
+const parsedMessage = computed(() => textUtils.parseMessage(props.message));
 </script>
 
 <style scoped>
@@ -131,15 +139,19 @@ const showLoading = computed(() => {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.ai-bubble {
-  background-color: var(--ai-message-bg);
-  border-top-left-radius: 4px;
-  border: 1px solid var(--border-color);
-}
 
 .user-bubble {
   background-color: var(--user-message-bg);
   color: white;
+}
+.thought-text {
+  display: block;
+  font-style: italic;
+  color: #888;
+  margin-top: 0.2em;
+  margin-bottom: 0.5em;
+  padding-left: 1em;
+  border-left: 2px solid #ccc;
 }
 
 .message-header {

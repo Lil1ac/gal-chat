@@ -15,10 +15,13 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
-@Configuration
+//@Configuration
 public class RagConfig {
+//    @Resource
+//    private EmbeddingModel qwenEmbeddingModel;
+
     @Resource
-    private EmbeddingModel qwenEmbeddingModel;
+    private EmbeddingModel myEmbeddingModel;
 
     @Resource
     private EmbeddingStore<TextSegment> embeddingStore;
@@ -36,14 +39,14 @@ public class RagConfig {
                     return TextSegment.from(textSegment.metadata().getString("file_name") +
                             '\n' + textSegment.text(), textSegment.metadata());
                 })
-                .embeddingModel(qwenEmbeddingModel)
+                .embeddingModel(myEmbeddingModel)
                 .embeddingStore(embeddingStore)
                 .build();
         // 加载文档
         ingestor.ingest(documents);
         // 自定义内容检索器
         EmbeddingStoreContentRetriever contentRetriever = EmbeddingStoreContentRetriever.builder()
-                .embeddingModel(qwenEmbeddingModel)
+                .embeddingModel(myEmbeddingModel)
                 .embeddingStore(embeddingStore)
                 .maxResults(5)
                 .minScore(0.75)

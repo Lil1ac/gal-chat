@@ -11,16 +11,39 @@ server:
 
 
 langchain4j:
-  community:
-    dashscope:
-      chat-model:
-        model-name: qwen-max-0403
-        api-key: ${aliQwen-api}
-      embedding-model:
-        model-name: text-embedding-v3
-        api-key: ${aliQwen-api}
-      streaming-chat-model:
-        model-name: qwen-max-0403
-        api-key: ${aliQwen-api}
-bigmodel:
-  api-key: ${zhipu-api}
+#  community:
+#    dashscope:
+#      chat-model:
+#        model-name: qwen-max-0403
+#        api-key: ${aliQwen-api}
+#      embedding-model:
+#        model-name: text-embedding-v3
+#        api-key: ${aliQwen-api}
+#      streaming-chat-model:
+#        model-name: qwen-max-0403
+#        api-key: ${aliQwen-api}
+
+  open-ai:
+    lora-chat-model:
+      api-key: ${deepseek-api}
+      base-url: http://localhost:8200/v1
+      model-name: /root/autodl-tmp/unsloth/merged_model
+    chat-model:
+      api-key: ${deepseek-api}
+      base-url: http://localhost:8300/v1
+      model-name: /root/autodl-tmp/Qwen/Qwen3-8B
+    streaming-chat-model:
+      api-key: ${deepseek-api}
+      base-url: http://localhost:8200/v1
+      model-name: /root/autodl-tmp/unsloth/merged_model
+#    embedding-model:
+#      api-key: ${deepseek-api}               # embedding接口的API密钥或空
+#      base-url: http://localhost:8300/v1  # embedding服务地址（通过ssh隧道转发）
+#      model-name: gpt-4   # 你的embedding模型名，示例占位
+
+#bigmodel:
+#  api-key: ${zhipu-api}
+
+#logging:
+#  level:
+#    dev.langchain4j: DEBUG

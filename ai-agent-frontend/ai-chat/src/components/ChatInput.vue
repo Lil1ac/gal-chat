@@ -40,7 +40,6 @@ const adjustHeight = () => {
     const el = textareaRef.value;
     if (!el) return;
     el.style.height = "auto";
-    console.log('el.scrollHeight', el.scrollHeight)
     const newHeight = Math.min(el.scrollHeight, 150);
     el.style.height = newHeight + "px";
 };
@@ -58,7 +57,6 @@ const handleSend = () => {
 
 const send = () => {
     if (!input.value.trim() || props.disabled) return;
-    console.log("Emitting send event with content:", input.value);
     emit("send", input.value.trim());
     input.value = "";
     // 重置高度

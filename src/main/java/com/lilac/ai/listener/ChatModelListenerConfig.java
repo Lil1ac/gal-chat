@@ -15,23 +15,23 @@ public class ChatModelListenerConfig {
     @Bean
     ChatModelListener chatModelListener() {
         return new ChatModelListener() {
-            @Override
-            public void onRequest(ChatModelRequestContext requestContext) {
-                var request = requestContext.chatRequest();
-                log.info("onRequest(): messages={}", request.messages()); // 或只取最后一条 request.messages().getLast()
-            }
-
-            @Override
-            public void onResponse(ChatModelResponseContext responseContext) {
-                var response = responseContext.chatResponse();
-                log.info("onResponse(): output={}", response.toString()); // 只取返回文本
-            }
-
-
-            @Override
-            public void onError(ChatModelErrorContext errorContext) {
-                log.info("onError(): {}", errorContext.error().getMessage());
-            }
+//            @Override
+//            public void onRequest(ChatModelRequestContext requestContext) {
+//                var request = requestContext.chatRequest();
+//                log.info("onRequest(): messages={}", request.messages()); // 或只取最后一条 request.messages().getLast()
+//            }
+//
+//            @Override
+//            public void onResponse(ChatModelResponseContext responseContext) {
+//                var response = responseContext.chatResponse();
+//                log.info("onResponse(): output={}", response.toString()); // 只取返回文本
+//            }
+//
+//
+//            @Override
+//            public void onError(ChatModelErrorContext errorContext) {
+//                log.info("onError(): {}", errorContext.error().getMessage());
+//            }
         };
     }
 }

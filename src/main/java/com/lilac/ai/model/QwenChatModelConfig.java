@@ -13,8 +13,8 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
-@Configuration
-@ConfigurationProperties(prefix = "langchain4j.community.dashscope.chat-model")
+//@Configuration
+//@ConfigurationProperties(prefix = "langchain4j.community.dashscope.chat-model")
 @Data
 public class QwenChatModelConfig {
     private String modelName;

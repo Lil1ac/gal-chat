@@ -1,6 +1,5 @@
 package com.lilac.ai.rag;
 
-import com.lilac.ai.QueryRewriteService;
 import dev.langchain4j.rag.content.Content;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.rag.query.Query;
@@ -21,13 +20,11 @@ import java.util.Map;
 public class GraphRagRetriever implements ContentRetriever {
 
     private final String endpoint;
-    private final QueryRewriteService queryRewriteService;
     private final OkHttpClient client = new OkHttpClient();
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public GraphRagRetriever(String endpoint, QueryRewriteService queryRewriteService) {
+    public GraphRagRetriever(String endpoint) {
         this.endpoint = endpoint;
-        this.queryRewriteService = queryRewriteService;
     }
 
     @Override
@@ -49,8 +46,7 @@ public class GraphRagRetriever implements ContentRetriever {
             String responseBody = response.body() != null ? response.body().string() : "";
             Map<String, Object> result = mapper.readValue(responseBody, Map.class);
             String context = (String) result.getOrDefault("response", "");
-            log.info("GraphRAG返回内容长度: {}", context.length());
-
+            log.info("GraphRAG查询的知识库: {}", context);
             return List.of(Content.from(context));
         } catch (IOException e) {
             log.error("GraphRAG检索失败", e);

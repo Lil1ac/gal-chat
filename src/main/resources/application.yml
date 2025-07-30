@@ -32,6 +32,7 @@ langchain4j:
       api-key: ${deepseek-api}
       base-url: http://localhost:8300/v1
       model-name: /root/autodl-tmp/Qwen/Qwen3-8B
+#      model-name: /root/autodl-tmp/unsloth/merged_model
     streaming-chat-model:
       api-key: ${deepseek-api}
       base-url: http://localhost:8200/v1

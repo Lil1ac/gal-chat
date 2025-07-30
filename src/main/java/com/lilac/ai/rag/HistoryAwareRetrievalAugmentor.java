@@ -1,15 +1,15 @@
 package com.lilac.ai.rag;
 
 import com.lilac.ai.QueryRewriteService;
-import dev.langchain4j.data.message.*;
-import dev.langchain4j.memory.ChatMemory;
-
+import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.data.message.ChatMessage;
+import dev.langchain4j.data.message.SystemMessage;
+import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
-import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.rag.AugmentationRequest;
 import dev.langchain4j.rag.AugmentationResult;
-import dev.langchain4j.rag.DefaultRetrievalAugmentor;
 import dev.langchain4j.rag.RetrievalAugmentor;
+import dev.langchain4j.rag.content.Content;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.rag.query.Metadata;
 import dev.langchain4j.rag.query.Query;
@@ -57,15 +57,14 @@ public class HistoryAwareRetrievalAugmentor implements RetrievalAugmentor {
                         if (msg instanceof UserMessage) {
                             return !((UserMessage) msg).singleText().equals(currentQuestion);
                         }
-                        return true;
+                        // 跳过系统消息
+                        return !(msg instanceof SystemMessage);
                     })
                     .map(msg -> {
-                        if (msg instanceof SystemMessage) {
-                            return "[系统] " + ((SystemMessage) msg).text();
-                        } else if (msg instanceof AiMessage) {
-                            return "[AI] " + ((AiMessage) msg).text();
+                        if (msg instanceof AiMessage) {
+                            return "[心铃] " + ((AiMessage) msg).text();
                         } else if (msg instanceof UserMessage) {
-                            return "[用户] " + ((UserMessage) msg).singleText();
+                            return "[直哉] " + ((UserMessage) msg).singleText();
                         } else {
                             return msg.toString();
                         }
@@ -80,14 +79,46 @@ public class HistoryAwareRetrievalAugmentor implements RetrievalAugmentor {
         log.info("精炼后的查询语句 (包含历史): {}", rewrittenQuery);
 
         // Step 4: 使用精炼后的查询语句创建一个新的 Query 对象，并调用底层的 ContentRetriever
-        // Query.from() 方法用于从文本和可选的元数据创建 Query 对象。
         Query rewrittenQueryObject = Query.from(rewrittenQuery, metadata);
-        List<dev.langchain4j.rag.content.Content> retrievedContents = underlyingContentRetriever.retrieve(rewrittenQueryObject);
+        List<Content> retrievedContents = underlyingContentRetriever.retrieve(rewrittenQueryObject);
+        log.info("所有检索到的内容:{}",retrievedContents);
 
-        // Step 5: 将检索到的内容包装成 AugmentationResult 返回
+        // Step 5: 注入内容
+//        ChatMessage augmentedChatMessage = injectContentsIntoUserMessage(retrievedContents, userChatMessage);
+
         return AugmentationResult.builder()
-                .chatMessage(userChatMessage)
-                .contents(retrievedContents)
+                .chatMessage(userChatMessage) // 返回增强后的用户消息
+                .contents(retrievedContents) // 返回所有检索到的内容
                 .build();
+    }
+
+    /**
+     * 注入逻辑（模拟 DefaultContentInjector.inject）
+     */
+    private ChatMessage injectContentsIntoUserMessage(List<Content> contents, UserMessage userMessage) {
+        if (contents == null || contents.isEmpty()) {
+            return userMessage;
+        }
+
+        // 将检索内容拼接成字符串
+        StringBuilder knowledgeBuilder = new StringBuilder();
+        for (Content content : contents) {
+            knowledgeBuilder.append(content.textSegment().text()).append("\n");
+        }
+
+        // 注入模板，这里直接简单拼接
+        String promptText = String.format(
+                "直哉刚刚对你说：%s\n" +
+                "结合以下知识库线索，用心铃自己的话回答（可参考，可忽略）：\n%s\n" +
+                "请你用心铃的口吻直接回应直哉，专注当前对话情绪，不要总结关系或分析立场，不要旁白式表达。",
+                userMessage.singleText(),
+                knowledgeBuilder.toString()
+        );
+
+        // 保持用户 name（如果存在）
+        if (userMessage.name() != null && !userMessage.name().isBlank()) {
+            return UserMessage.from(promptText, userMessage.name());
+        }
+        return UserMessage.from(promptText);
     }
 }

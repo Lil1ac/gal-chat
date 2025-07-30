@@ -20,7 +20,7 @@ public class AiController {
     @GetMapping("/chat")
     public Flux<ServerSentEvent<String>> chat(int memoryId, String message) {
         log.info("chat with memoryId: {}, message: {}", memoryId, message);
-        return aiHelperService.chatStream(memoryId, message)
+        return aiHelperService.chatStreamWithGraphRag(memoryId, message)
                 .map(chunk -> ServerSentEvent.<String>builder()
                         .data(chunk)
                         .build())

@@ -38,10 +38,6 @@ public interface AiHelperService {
     @SystemMessage(fromResource = "system-prompt.txt")
     String chatWithGraphRag(@MemoryId int memoryId,@UserMessage String message);
 
-    //流式输出
-    @SystemMessage(fromResource = "system-prompt.txt")
-    Flux<String> chatStream(@MemoryId int memoryId, @UserMessage String message);
-
     //流式输出+GraphRAG
     @SystemMessage(fromResource = "system-prompt.txt")
     Flux<String> chatStreamWithGraphRag(@MemoryId int memoryId, @UserMessage String message);

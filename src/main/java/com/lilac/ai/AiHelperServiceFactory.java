@@ -2,6 +2,8 @@ package com.lilac.ai;
 
 import com.lilac.ai.rag.GraphRagRetriever;
 import com.lilac.ai.rag.HistoryAwareRetrievalAugmentor;
+import com.lilac.ai.rag.MyRetrieverConfig;
+import dev.langchain4j.community.model.dashscope.QwenChatModel;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
@@ -11,6 +13,8 @@ import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import dev.langchain4j.rag.RetrievalAugmentor;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 
+import dev.langchain4j.rag.query.transformer.ExpandingQueryTransformer;
+import dev.langchain4j.rag.query.transformer.QueryTransformer;
 import dev.langchain4j.service.AiServices;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -22,8 +26,7 @@ import org.springframework.context.annotation.Configuration;
 public class AiHelperServiceFactory {
 
 //    @Resource
-//    private ChatModel myQwenChatModel;
-
+//    private QwenChatModel qwenChatModel;
     @Resource
     private OpenAiChatModel openAiChatModel;
 
@@ -39,7 +42,8 @@ public class AiHelperServiceFactory {
     @Resource
     private OpenAiStreamingChatModel OpenAiStreamingChatModel;
 
-
+    @Resource
+    private RetrievalAugmentor myRetrievalAugmentor;
 
 
     /**
@@ -47,24 +51,24 @@ public class AiHelperServiceFactory {
      * 它现在只负责执行检索，不负责查询重写。
      * @return ContentRetriever实例
      */
-    @Bean
-    public ContentRetriever graphRagRetriever() {
-        return new GraphRagRetriever("http://localhost:8100/search/local", queryRewriteService());
-    }
+//    @Bean
+//    public ContentRetriever graphRagRetriever() {
+//        return new GraphRagRetriever("http://localhost:8100/search/local");
+//    }
 
 
 
-    /**
-     * 配置并返回QueryRewriteService实例。
-     * 这个服务用于精炼用户问题。
-     * @return QueryRewriteService实例
-     */
-    @Bean
-    public QueryRewriteService queryRewriteService() {
-        return AiServices.builder(QueryRewriteService.class)
-                .chatModel(openAiChatModel)
-                .build();
-    }
+//    /**
+//     * 配置并返回QueryRewriteService实例。
+//     * 这个服务用于精炼用户问题。
+//     * @return QueryRewriteService实例
+//     */
+//    @Bean
+//    public QueryRewriteService queryRewriteService() {
+//        return AiServices.builder(QueryRewriteService.class)
+//                .chatModel(openAiChatModel)
+//                .build();
+//    }
 
 
 
@@ -84,17 +88,17 @@ public class AiHelperServiceFactory {
 
     /**
      * 配置并返回自定义的RetrievalAugmentor实例。
-     * 这是RAG流程的核心，它会处理查询重写和内容检索。
+     * 这是RAG流程的核心，负责用 ExpandingQueryTransformer 扩展查询，并调用 GraphRagRetriever 检索
      * @return RetrievalAugmentor实例
      */
-    @Bean
-    public RetrievalAugmentor retrievalAugmentor() {
-        return new HistoryAwareRetrievalAugmentor(
-                queryRewriteService(),          // 注入查询重写服务
-                graphRagRetriever(),            // 注入底层的检索器
-                chatMemoryProvider()            // 注入聊天记忆提供者
-        );
-    }
+//    @Bean
+//    public RetrievalAugmentor retrievalAugmentor() {
+//        return new HistoryAwareRetrievalAugmentor(
+//                queryRewriteService(),      // 注入查询重写服务
+//                graphRagRetriever(),            // 注入底层的检索器
+//                chatMemoryProvider()            // 注入聊天记忆提供者
+//        );
+//    }
 
 
 
@@ -108,13 +112,13 @@ public class AiHelperServiceFactory {
         ChatMemory chatMemory = MessageWindowChatMemory.withMaxMessages(10);
 
         AiHelperService aiHelperService = AiServices.builder(AiHelperService.class)
-                .chatModel( openAiLoraChatModel)
+                .chatModel(openAiLoraChatModel)
                 .streamingChatModel(OpenAiStreamingChatModel) // 流式输出
                 .chatMemory(chatMemory)
                 .chatMemoryProvider(memoryId -> MessageWindowChatMemory.withMaxMessages(10)) // 每个会话独立存储
 //                .contentRetriever(contentRetriever) // RAG
 //                .contentRetriever(graphRagRetriever()) // graphRAG
-                .retrievalAugmentor(retrievalAugmentor()) // 启用自定义的RetrievalAugmentor来处理RAG
+                .retrievalAugmentor(myRetrievalAugmentor) // 启用自定义的RetrievalAugmentor来处理RAG
 //                .tools(new MoeGirlSearchTool()) // 工具
 //                .toolProvider(mcpToolProvider) // MCP
                 .build();
